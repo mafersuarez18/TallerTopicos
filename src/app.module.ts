@@ -7,6 +7,7 @@ import { TasksModule } from './tasks/tasks.module';
 import { UsersModule } from './users/users.module';
 import { ProjectsModule } from './projects/projects.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { PerformanceInterceptor } from './common/interceptors/performance.interceptor';
 
 /**
  * @module AppModule
@@ -39,6 +40,15 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
        */
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
+    },
+    {
+      /**
+       * Global AOP performance interceptor registration.
+       * PerformanceInterceptor measures execution time and warns on slow operations,
+       * acting as a separate cross-cutting concern independent of business logic.
+       */
+      provide: APP_INTERCEPTOR,
+      useClass: PerformanceInterceptor,
     },
   ],
 })
