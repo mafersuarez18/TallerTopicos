@@ -5,57 +5,62 @@ import { Project } from '../projects/project.entity';
 
 /**
  * @class Task
- * @description GraphQL ObjectType representing a task in the project management system.
- * A task belongs to a project and can be assigned to a user, with lifecycle states
- * and organizational tags.
+ *
+ * Entidad principal del sistema: representa una tarea dentro de un proyecto.
+ * Una tarea siempre pertenece a un proyecto y tiene un usuario responsable.
+ *
+ * Los campos de relación (assignedUser, project) se resuelven desde los
+ * servicios correspondientes al momento de crear o actualizar la tarea.
  */
 @ObjectType()
 export class Task {
   /**
-   * Unique identifier for the task (UUID v4).
+   * Identificador único de la tarea (UUID v4).
    */
   @Field(() => ID)
   id: string;
 
   /**
-   * Short, descriptive title of the task.
+   * Título corto y descriptivo de la tarea.
    */
   @Field()
   title: string;
 
   /**
-   * Detailed description explaining what the task entails.
+   * Descripción detallada de qué hay que hacer y por qué.
    */
   @Field()
   description: string;
 
   /**
-   * Current lifecycle state of the task.
+   * Estado actual de la tarea dentro del flujo de trabajo.
+   * Puede ser BACKLOG, TODO, IN_PROGRESS o DONE.
    * @see TaskStatus
    */
   @Field(() => TaskStatus)
   status: TaskStatus;
 
   /**
-   * Dynamic array of string tags for categorizing and filtering tasks.
+   * Etiquetas para categorizar y filtrar tareas (ej: ["bug", "frontend", "urgente"]).
+   * Es un arreglo dinámico que puede estar vacío.
    */
   @Field(() => [String])
   tags: string[];
 
   /**
-   * ISO 8601 timestamp of when the task was created.
+   * Fecha y hora de creación de la tarea (ISO 8601).
    */
   @Field()
   createdAt: string;
 
   /**
-   * The user responsible for completing this task.
+   * Usuario asignado como responsable de completar la tarea.
    */
   @Field(() => User)
   assignedUser: User;
 
   /**
-   * The project this task belongs to.
+   * Proyecto al que pertenece esta tarea.
    */
   @Field(() => Project)
   project: Project;

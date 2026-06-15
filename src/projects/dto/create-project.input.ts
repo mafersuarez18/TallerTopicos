@@ -2,18 +2,20 @@ import { InputType, Field } from '@nestjs/graphql';
 
 /**
  * @class CreateProjectInput
- * @description GraphQL InputType for creating a new project.
+ *
+ * Datos requeridos para crear un proyecto nuevo.
+ * Tanto el nombre como la descripción son obligatorios.
  */
 @InputType()
 export class CreateProjectInput {
   /**
-   * Name of the project to be created.
+   * Nombre del proyecto.
    */
   @Field()
   name: string;
 
   /**
-   * Detailed description of the project.
+   * Descripción del proyecto.
    */
   @Field()
   description: string;

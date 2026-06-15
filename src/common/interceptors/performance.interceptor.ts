@@ -9,36 +9,38 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { GqlExecutionContext } from '@nestjs/graphql';
 
-/** Threshold in milliseconds above which an operation is flagged as slow */
+// Si una operación tarda más de esto, la marcamos como "lenta" en los logs
 const SLOW_OPERATION_THRESHOLD_MS = 500;
 
 /**
  * @class PerformanceInterceptor
  * @implements {NestInterceptor}
  *
- * AOP-based performance monitoring interceptor — a cross-cutting concern
- * that measures the execution time of every GraphQL operation and emits
- * a warning when it exceeds the defined threshold.
+ * Segundo interceptor AOP de la aplicación, dedicado al monitoreo de rendimiento.
+ * Mide cuánto tiempo tarda cada operación de GraphQL y lanza una advertencia
+ * si supera el umbral definido arriba.
  *
- * Keeping performance monitoring separate from business logic follows the
- * Aspect-Oriented Programming paradigm: performance concerns are handled
- * in one place and applied uniformly without touching any resolver or service.
+ * Separar esto del LoggingInterceptor es importante: cada aspecto tiene
+ * una sola responsabilidad. El logging loguea el flujo, este mide el tiempo.
+ * Si mañana queremos quitar el monitoreo de performance, solo removemos este interceptor.
  */
 @Injectable()
 export class PerformanceInterceptor implements NestInterceptor {
   private readonly logger = new Logger(PerformanceInterceptor.name);
 
   /**
-   * Intercepts the execution context to measure and report operation duration.
+   * Mide el tiempo de ejecución de cada operación GraphQL.
    *
-   * @param {ExecutionContext} context - The current execution context
-   * @param {CallHandler} next - The next handler in the interceptor chain
-   * @returns {Observable<any>} The observable of the response with timing side effects
+   * @param {ExecutionContext} context - Contexto de ejecución de NestJS
+   * @param {CallHandler} next - Handler que ejecuta el resolver real
+   * @returns {Observable<any>} El mismo resultado del resolver, sin modificaciones
    */
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    // Marcamos el momento de inicio
     const start = Date.now();
     const contextType = context.getType<string>();
 
+    // Construimos una etiqueta legible para identificar la operación en los logs
     let operationLabel = 'Unknown';
 
     if (contextType === 'graphql') {
@@ -46,19 +48,23 @@ export class PerformanceInterceptor implements NestInterceptor {
       const info = gqlCtx.getInfo();
       const fieldName = info?.fieldName ?? 'Unknown';
       const parentType = info?.parentType?.name ?? 'Unknown';
+      // Ejemplo del resultado: "Query.tasks" o "Mutation.createTask"
       operationLabel = `${parentType}.${fieldName}`;
     }
 
     return next.handle().pipe(
       tap(() => {
         const elapsed = Date.now() - start;
+
+        // Si superó el umbral, avisamos con un warning para que se pueda investigar
         if (elapsed > SLOW_OPERATION_THRESHOLD_MS) {
           this.logger.warn(
-            `[Performance] SLOW operation detected: ${operationLabel} took ${elapsed}ms (threshold: ${SLOW_OPERATION_THRESHOLD_MS}ms)`,
+            `[Performance] Operación LENTA detectada: ${operationLabel} tardó ${elapsed}ms (umbral: ${SLOW_OPERATION_THRESHOLD_MS}ms)`,
           );
         } else {
+          // Si está dentro del tiempo esperado, solo lo registramos en debug
           this.logger.debug(
-            `[Performance] ${operationLabel} completed in ${elapsed}ms`,
+            `[Performance] ${operationLabel} completado en ${elapsed}ms`,
           );
         }
       }),

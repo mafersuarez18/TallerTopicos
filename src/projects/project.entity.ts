@@ -2,31 +2,33 @@ import { ObjectType, Field, ID } from '@nestjs/graphql';
 
 /**
  * @class Project
- * @description GraphQL ObjectType representing a software development project.
- * Tasks belong to projects, providing organizational grouping.
+ *
+ * Representa un proyecto de desarrollo de software.
+ * Cada tarea debe pertenecer a un proyecto, así organizamos
+ * el trabajo por contexto o equipo.
  */
 @ObjectType()
 export class Project {
   /**
-   * Unique identifier for the project (UUID v4).
+   * Identificador único del proyecto (UUID v4).
    */
   @Field(() => ID)
   id: string;
 
   /**
-   * Name of the project.
+   * Nombre del proyecto.
    */
   @Field()
   name: string;
 
   /**
-   * Detailed description of the project's purpose and scope.
+   * Descripción del proyecto: qué es, para qué sirve, etc.
    */
   @Field()
   description: string;
 
   /**
-   * ISO 8601 timestamp of when the project was created.
+   * Fecha de creación del proyecto en formato ISO 8601.
    */
   @Field()
   createdAt: string;

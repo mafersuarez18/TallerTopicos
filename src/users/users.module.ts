@@ -4,11 +4,16 @@ import { UsersResolver } from './users.resolver';
 
 /**
  * @module UsersModule
- * @description NestJS module that encapsulates all user-related functionality.
- * Exports UsersService so other modules (e.g., TasksModule) can inject it.
+ *
+ * Módulo que agrupa todo lo relacionado con usuarios:
+ * el resolver (que maneja las queries/mutations de GraphQL)
+ * y el servicio (que tiene la lógica de negocio).
+ *
+ * Exportamos el UsersService porque TasksModule lo necesita
+ * para poder verificar que un usuario existe cuando se crea una tarea.
  */
 @Module({
   providers: [UsersResolver, UsersService],
-  exports: [UsersService],
+  exports: [UsersService], // TasksModule va a necesitar este servicio
 })
 export class UsersModule {}

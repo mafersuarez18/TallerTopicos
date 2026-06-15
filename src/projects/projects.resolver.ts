@@ -6,21 +6,23 @@ import { UpdateProjectInput } from './dto/update-project.input';
 
 /**
  * @class ProjectsResolver
- * @description GraphQL resolver for project-related queries and mutations.
- * Delegates all business logic to ProjectsService following the resolver pattern.
+ *
+ * Resolver de GraphQL para las operaciones relacionadas con proyectos.
+ * Recibe las queries y mutations del cliente y las pasa al ProjectsService.
+ * Toda la lógica real vive en el servicio, aquí solo "enrutamos".
  */
 @Resolver(() => Project)
 export class ProjectsResolver {
   /**
    * @constructor
-   * @param {ProjectsService} projectsService - Injected service for project operations
+   * @param {ProjectsService} projectsService - Servicio con la lógica de proyectos
    */
   constructor(private readonly projectsService: ProjectsService) {}
 
   /**
-   * Query to retrieve all projects in the system.
+   * Query que retorna todos los proyectos del sistema.
    *
-   * @returns {Project[]} List of all projects
+   * @returns {Project[]} Lista de proyectos
    */
   @Query(() => [Project], { name: 'projects' })
   findAll(): Project[] {
@@ -28,10 +30,10 @@ export class ProjectsResolver {
   }
 
   /**
-   * Query to find a specific project by its unique identifier.
+   * Query para obtener un proyecto específico por su ID.
    *
-   * @param {string} id - The UUID of the project to retrieve
-   * @returns {Project} The found project
+   * @param {string} id - UUID del proyecto
+   * @returns {Project} El proyecto encontrado
    */
   @Query(() => Project, { name: 'project' })
   findOne(@Args('id', { type: () => ID }) id: string): Project {
@@ -39,10 +41,10 @@ export class ProjectsResolver {
   }
 
   /**
-   * Mutation to create a new project in the system.
+   * Mutation para crear un proyecto nuevo.
    *
-   * @param {CreateProjectInput} createProjectInput - The input data for the new project
-   * @returns {Project} The newly created project
+   * @param {CreateProjectInput} createProjectInput - Datos del nuevo proyecto
+   * @returns {Project} El proyecto recién creado
    */
   @Mutation(() => Project)
   createProject(
@@ -52,10 +54,10 @@ export class ProjectsResolver {
   }
 
   /**
-   * Mutation to update an existing project's information.
+   * Mutation para editar un proyecto existente.
    *
-   * @param {UpdateProjectInput} updateProjectInput - The input data with updated fields
-   * @returns {Project} The updated project
+   * @param {UpdateProjectInput} updateProjectInput - Datos a modificar
+   * @returns {Project} El proyecto actualizado
    */
   @Mutation(() => Project)
   updateProject(
@@ -65,10 +67,10 @@ export class ProjectsResolver {
   }
 
   /**
-   * Mutation to delete a project from the system.
+   * Mutation para eliminar un proyecto.
    *
-   * @param {string} id - The UUID of the project to remove
-   * @returns {boolean} True if deletion was successful
+   * @param {string} id - UUID del proyecto a eliminar
+   * @returns {boolean} true si se eliminó correctamente
    */
   @Mutation(() => Boolean)
   removeProject(@Args('id', { type: () => ID }) id: string): boolean {

@@ -2,27 +2,34 @@ import { registerEnumType } from '@nestjs/graphql';
 
 /**
  * @enum TaskStatus
- * @description Represents the lifecycle states of a task in the system.
- * Tasks progress through these states as work advances.
+ *
+ * Los posibles estados de una tarea dentro del sistema.
+ * Siguen el flujo típico de trabajo de un equipo de desarrollo:
+ * BACKLOG → TODO → IN_PROGRESS → DONE
  */
 export enum TaskStatus {
-  /** Task has been identified but not yet scheduled */
+  // La tarea existe pero aún no está planificada para ningún sprint
   BACKLOG = 'BACKLOG',
-  /** Task is scheduled and ready to be started */
+
+  // Está planificada y lista para que alguien la tome
   TODO = 'TODO',
-  /** Task is currently being worked on */
+
+  // Alguien la está trabajando activamente
   IN_PROGRESS = 'IN_PROGRESS',
-  /** Task has been completed */
+
+  // Terminada
   DONE = 'DONE',
 }
 
+// Registramos el enum en GraphQL para que sea visible en el schema
+// y el playground pueda mostrar las opciones disponibles
 registerEnumType(TaskStatus, {
   name: 'TaskStatus',
-  description: 'The possible lifecycle states of a task',
+  description: 'Estados posibles de una tarea en el sistema',
   valuesMap: {
-    BACKLOG: { description: 'Task identified but not yet scheduled' },
-    TODO: { description: 'Task scheduled and ready to start' },
-    IN_PROGRESS: { description: 'Task currently being worked on' },
-    DONE: { description: 'Task completed' },
+    BACKLOG: { description: 'Tarea identificada pero aún no planificada' },
+    TODO: { description: 'Tarea lista para comenzar' },
+    IN_PROGRESS: { description: 'Tarea en progreso actualmente' },
+    DONE: { description: 'Tarea completada' },
   },
 });

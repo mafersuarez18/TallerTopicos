@@ -3,51 +3,56 @@ import { TaskStatus } from '../enums/task-status.enum';
 
 /**
  * @class UpdateTaskInput
- * @description GraphQL InputType for updating an existing task.
- * Supports partial updates: status, tags, assigned user, and descriptive fields
- * can all be changed independently.
+ *
+ * Datos para actualizar una tarea existente.
+ * Solo el id es obligatorio; todos los demás son opcionales.
+ * Esto permite actualizar solo lo que necesitemos:
+ * por ejemplo, solo cambiar el estado sin tocar las etiquetas ni el usuario.
  */
 @InputType()
 export class UpdateTaskInput {
   /**
-   * Unique identifier of the task to be updated.
+   * ID de la tarea que se quiere modificar.
    */
   @Field(() => ID)
   id: string;
 
   /**
-   * New title for the task (optional).
+   * Nuevo título de la tarea (opcional).
    */
   @Field({ nullable: true })
   title?: string;
 
   /**
-   * New description for the task (optional).
+   * Nueva descripción (opcional).
    */
   @Field({ nullable: true })
   description?: string;
 
   /**
-   * New lifecycle status for the task (optional).
+   * Nuevo estado de la tarea (opcional).
+   * Útil para mover la tarea entre columnas: TODO → IN_PROGRESS → DONE.
    */
   @Field(() => TaskStatus, { nullable: true })
   status?: TaskStatus;
 
   /**
-   * Replacement array of tags for the task (optional).
-   * Replaces the entire tags array, not appends to it.
+   * Nuevo arreglo de etiquetas (opcional).
+   * Reemplaza las etiquetas actuales, no las agrega.
    */
   @Field(() => [String], { nullable: true })
   tags?: string[];
 
   /**
-   * ID of the new user to assign this task to (optional).
+   * ID del nuevo usuario asignado (opcional).
+   * Permite reasignar la tarea a otra persona.
    */
   @Field(() => ID, { nullable: true })
   assignedUserId?: string;
 
   /**
-   * ID of the new project to move this task to (optional).
+   * ID del proyecto destino (opcional).
+   * Permite mover la tarea a otro proyecto.
    */
   @Field(() => ID, { nullable: true })
   projectId?: string;

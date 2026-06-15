@@ -6,21 +6,25 @@ import { UpdateUserInput } from './dto/update-user.input';
 
 /**
  * @class UsersResolver
- * @description GraphQL resolver for user-related queries and mutations.
- * Delegates all business logic to UsersService following the resolver pattern.
+ *
+ * Resolver de GraphQL para todo lo relacionado con usuarios.
+ * Los resolvers son como los controllers de REST: reciben las peticiones
+ * de GraphQL y las delegan al servicio correspondiente.
+ *
+ * No ponemos lógica de negocio aquí, solo delegamos al UsersService.
  */
 @Resolver(() => User)
 export class UsersResolver {
   /**
    * @constructor
-   * @param {UsersService} usersService - Injected service for user operations
+   * @param {UsersService} usersService - Servicio inyectado con la lógica de usuarios
    */
   constructor(private readonly usersService: UsersService) {}
 
   /**
-   * Query to retrieve all users in the system.
+   * Query para obtener todos los usuarios del sistema.
    *
-   * @returns {User[]} List of all users
+   * @returns {User[]} Lista completa de usuarios
    */
   @Query(() => [User], { name: 'users' })
   findAll(): User[] {
@@ -28,10 +32,10 @@ export class UsersResolver {
   }
 
   /**
-   * Query to find a specific user by their unique identifier.
+   * Query para obtener un usuario específico por su ID.
    *
-   * @param {string} id - The UUID of the user to retrieve
-   * @returns {User} The found user
+   * @param {string} id - UUID del usuario
+   * @returns {User} El usuario encontrado
    */
   @Query(() => User, { name: 'user' })
   findOne(@Args('id', { type: () => ID }) id: string): User {
@@ -39,10 +43,10 @@ export class UsersResolver {
   }
 
   /**
-   * Mutation to create a new user in the system.
+   * Mutation para crear un nuevo usuario.
    *
-   * @param {CreateUserInput} createUserInput - The input data for the new user
-   * @returns {User} The newly created user
+   * @param {CreateUserInput} createUserInput - Datos del usuario a crear
+   * @returns {User} El usuario creado con su ID y fecha de creación
    */
   @Mutation(() => User)
   createUser(
@@ -52,10 +56,11 @@ export class UsersResolver {
   }
 
   /**
-   * Mutation to update an existing user's information.
+   * Mutation para editar un usuario existente.
+   * Solo se actualizan los campos que se envíen.
    *
-   * @param {UpdateUserInput} updateUserInput - The input data with updated fields
-   * @returns {User} The updated user
+   * @param {UpdateUserInput} updateUserInput - Campos a modificar
+   * @returns {User} El usuario con los datos actualizados
    */
   @Mutation(() => User)
   updateUser(
@@ -65,10 +70,10 @@ export class UsersResolver {
   }
 
   /**
-   * Mutation to delete a user from the system.
+   * Mutation para eliminar un usuario del sistema.
    *
-   * @param {string} id - The UUID of the user to remove
-   * @returns {boolean} True if deletion was successful
+   * @param {string} id - UUID del usuario a eliminar
+   * @returns {boolean} true si se eliminó, lanza error si no existe
    */
   @Mutation(() => Boolean)
   removeUser(@Args('id', { type: () => ID }) id: string): boolean {

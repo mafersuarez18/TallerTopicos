@@ -4,11 +4,13 @@ import { ProjectsResolver } from './projects.resolver';
 
 /**
  * @module ProjectsModule
- * @description NestJS module that encapsulates all project-related functionality.
- * Exports ProjectsService so other modules (e.g., TasksModule) can inject it.
+ *
+ * Módulo que agrupa el resolver y el servicio de proyectos.
+ * Exportamos ProjectsService porque TasksModule lo necesita
+ * para verificar que el proyecto de una tarea exista.
  */
 @Module({
   providers: [ProjectsResolver, ProjectsService],
-  exports: [ProjectsService],
+  exports: [ProjectsService], // lo necesita TasksModule
 })
 export class ProjectsModule {}

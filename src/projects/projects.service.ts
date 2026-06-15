@@ -7,19 +7,22 @@ import { LogAction } from '../common/decorators/log-action.decorator';
 
 /**
  * @class ProjectsService
- * @description Service responsible for all business logic related to projects.
- * Uses an in-memory store for data persistence during the server session.
- * The @LogAction decorator applies AOP logging as a cross-cutting concern.
+ *
+ * Contiene toda la lógica de negocio relacionada con proyectos.
+ * Guarda los proyectos en memoria (se pierden al reiniciar el servidor).
+ *
+ * Cada método tiene el decorador @LogAction que, siguiendo el principio de AOP,
+ * agrega logging automático sin mezclar esa responsabilidad con la lógica del servicio.
  */
 @Injectable()
 export class ProjectsService {
-  /** @private In-memory storage for projects */
+  // Lista de proyectos en memoria
   private readonly projects: Project[] = [];
 
   /**
-   * Retrieves all projects in the system.
+   * Retorna todos los proyectos registrados en el sistema.
    *
-   * @returns {Project[]} Array of all registered projects
+   * @returns {Project[]} Lista de proyectos
    */
   @LogAction('ProjectsService')
   findAll(): Project[] {
@@ -27,26 +30,28 @@ export class ProjectsService {
   }
 
   /**
-   * Finds a single project by its unique identifier.
+   * Busca un proyecto por su ID.
    *
-   * @param {string} id - The UUID of the project to find
-   * @returns {Project} The found project
-   * @throws {NotFoundException} When no project exists with the given id
+   * @param {string} id - UUID del proyecto
+   * @returns {Project} El proyecto encontrado
+   * @throws {NotFoundException} Si no existe un proyecto con ese ID
    */
   @LogAction('ProjectsService')
   findOne(id: string): Project {
     const project = this.projects.find((p) => p.id === id);
+
     if (!project) {
-      throw new NotFoundException(`Project with id "${id}" not found`);
+      throw new NotFoundException(`Proyecto con id "${id}" no encontrado`);
     }
+
     return project;
   }
 
   /**
-   * Creates a new project in the system.
+   * Crea un proyecto nuevo con ID generado automáticamente.
    *
-   * @param {CreateProjectInput} input - The data required to create the project
-   * @returns {Project} The newly created project with generated id and timestamps
+   * @param {CreateProjectInput} input - Datos del proyecto
+   * @returns {Project} El proyecto creado
    */
   @LogAction('ProjectsService')
   create(input: CreateProjectInput): Project {
@@ -56,38 +61,45 @@ export class ProjectsService {
       description: input.description,
       createdAt: new Date().toISOString(),
     };
+
     this.projects.push(newProject);
     return newProject;
   }
 
   /**
-   * Updates an existing project's information.
+   * Actualiza un proyecto existente.
+   * Solo modifica los campos que se envíen en el input.
    *
-   * @param {UpdateProjectInput} input - The updated fields for the project
-   * @returns {Project} The updated project object
-   * @throws {NotFoundException} When no project exists with the given id
+   * @param {UpdateProjectInput} input - Campos a actualizar
+   * @returns {Project} El proyecto con los datos actualizados
+   * @throws {NotFoundException} Si el proyecto no existe
    */
   @LogAction('ProjectsService')
   update(input: UpdateProjectInput): Project {
     const project = this.findOne(input.id);
+
+    // Actualizamos solo los campos que llegaron
     if (input.name !== undefined) project.name = input.name;
     if (input.description !== undefined) project.description = input.description;
+
     return project;
   }
 
   /**
-   * Removes a project from the system by its id.
+   * Elimina un proyecto del sistema por su ID.
    *
-   * @param {string} id - The UUID of the project to delete
-   * @returns {boolean} True if the project was successfully removed
-   * @throws {NotFoundException} When no project exists with the given id
+   * @param {string} id - UUID del proyecto a eliminar
+   * @returns {boolean} true si se eliminó correctamente
+   * @throws {NotFoundException} Si el proyecto no existe
    */
   @LogAction('ProjectsService')
   remove(id: string): boolean {
     const index = this.projects.findIndex((p) => p.id === id);
+
     if (index === -1) {
-      throw new NotFoundException(`Project with id "${id}" not found`);
+      throw new NotFoundException(`Proyecto con id "${id}" no encontrado`);
     }
+
     this.projects.splice(index, 1);
     return true;
   }
