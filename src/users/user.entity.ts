@@ -2,31 +2,37 @@ import { ObjectType, Field, ID } from '@nestjs/graphql';
 
 /**
  * @class User
- * @description GraphQL ObjectType representing a user in the task management system.
- * Users can be assigned to tasks as responsible members.
+ *
+ * Representa a un usuario dentro del sistema de gestión de tareas.
+ * Los usuarios pueden ser asignados a tareas como responsables de completarlas.
+ *
+ * @ObjectType() le dice a NestJS GraphQL que esta clase es un tipo
+ * de salida en el schema, es decir, puede ser parte de una respuesta.
  */
 @ObjectType()
 export class User {
   /**
-   * Unique identifier for the user (UUID v4).
+   * Identificador único del usuario.
+   * Generado automáticamente con UUID v4 al momento de crear el usuario.
    */
   @Field(() => ID)
   id: string;
 
   /**
-   * Full name of the user.
+   * Nombre completo del usuario.
    */
   @Field()
   name: string;
 
   /**
-   * Email address of the user. Used for identification and notifications.
+   * Correo electrónico del usuario.
+   * Se usa para identificarlo de forma única en el sistema.
    */
   @Field()
   email: string;
 
   /**
-   * ISO 8601 timestamp of when the user was created.
+   * Fecha y hora en que fue creado el usuario (formato ISO 8601).
    */
   @Field()
   createdAt: string;

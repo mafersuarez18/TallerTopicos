@@ -2,19 +2,21 @@ import { InputType, Field } from '@nestjs/graphql';
 
 /**
  * @class CreateUserInput
- * @description GraphQL InputType for creating a new user.
- * Contains all required fields to register a user in the system.
+ *
+ * Define los datos que hay que mandar para crear un usuario nuevo.
+ * @InputType() lo convierte en un tipo de entrada de GraphQL,
+ * o sea, es lo que el cliente envía en la mutation.
  */
 @InputType()
 export class CreateUserInput {
   /**
-   * Full name of the user to be created.
+   * Nombre completo del nuevo usuario.
    */
   @Field()
   name: string;
 
   /**
-   * Email address of the user. Must be unique across the system.
+   * Correo electrónico del usuario.
    */
   @Field()
   email: string;

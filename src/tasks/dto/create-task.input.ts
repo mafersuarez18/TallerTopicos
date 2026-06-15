@@ -3,43 +3,47 @@ import { TaskStatus } from '../enums/task-status.enum';
 
 /**
  * @class CreateTaskInput
- * @description GraphQL InputType for creating a new task.
- * Contains all required fields to register a task in the system.
+ *
+ * Datos necesarios para crear una tarea nueva.
+ * El título, descripción, usuario y proyecto son obligatorios.
+ * Las etiquetas y el estado son opcionales (por defecto el estado es BACKLOG).
  */
 @InputType()
 export class CreateTaskInput {
   /**
-   * Short, descriptive title for the task.
+   * Título corto de la tarea.
    */
   @Field()
   title: string;
 
   /**
-   * Detailed description of what the task entails.
+   * Descripción detallada de lo que hay que hacer.
    */
   @Field()
   description: string;
 
   /**
-   * Initial lifecycle status of the task. Defaults to BACKLOG if not provided.
+   * Estado inicial de la tarea.
+   * Si no se pasa, se asigna BACKLOG por defecto.
    */
   @Field(() => TaskStatus, { nullable: true })
   status?: TaskStatus;
 
   /**
-   * Array of string tags to categorize the task.
+   * Etiquetas para clasificar la tarea (ej: ["bug", "ui"]).
+   * Si no se pasa, queda como arreglo vacío.
    */
   @Field(() => [String], { nullable: true })
   tags?: string[];
 
   /**
-   * ID of the user to assign this task to.
+   * ID del usuario que va a ser responsable de esta tarea.
    */
   @Field(() => ID)
   assignedUserId: string;
 
   /**
-   * ID of the project this task belongs to.
+   * ID del proyecto al que pertenece la tarea.
    */
   @Field(() => ID)
   projectId: string;

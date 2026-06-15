@@ -6,10 +6,14 @@ import { ProjectsModule } from '../projects/projects.module';
 
 /**
  * @module TasksModule
- * @description NestJS module that encapsulates all task-related functionality.
- * Imports UsersModule and ProjectsModule to resolve task relationships.
+ *
+ * Módulo de tareas: el más importante de la aplicación.
+ * Importa UsersModule y ProjectsModule porque al crear/actualizar
+ * una tarea necesitamos acceder a los servicios de esos módulos
+ * para validar que el usuario y el proyecto existan.
  */
 @Module({
+  // Necesitamos acceso a UsersService y ProjectsService
   imports: [UsersModule, ProjectsModule],
   providers: [TasksResolver, TasksService],
 })

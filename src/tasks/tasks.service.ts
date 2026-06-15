@@ -10,20 +10,23 @@ import { LogAction } from '../common/decorators/log-action.decorator';
 
 /**
  * @class TasksService
- * @description Service responsible for all business logic related to tasks.
- * Coordinates with UsersService and ProjectsService to resolve relationships.
- * Uses an in-memory store for data persistence during the server session.
- * The @LogAction decorator applies AOP logging as a cross-cutting concern.
+ *
+ * Servicio principal de la aplicación: maneja toda la lógica de negocio de las tareas.
+ * Para crear o actualizar una tarea, necesita acceso a UsersService y ProjectsService
+ * para verificar que el usuario y el proyecto existan antes de asignarlos.
+ *
+ * Como en los otros servicios, el decorador @LogAction aplica AOP:
+ * agrega logs automáticamente a cada método sin contaminar la lógica de negocio.
  */
 @Injectable()
 export class TasksService {
-  /** @private In-memory storage for tasks */
+  // Almacenamiento en memoria de las tareas
   private readonly tasks: Task[] = [];
 
   /**
    * @constructor
-   * @param {UsersService} usersService - Service for resolving user references
-   * @param {ProjectsService} projectsService - Service for resolving project references
+   * @param {UsersService} usersService - Para verificar/obtener usuarios al asignar tareas
+   * @param {ProjectsService} projectsService - Para verificar/obtener proyectos al crear tareas
    */
   constructor(
     private readonly usersService: UsersService,
@@ -31,9 +34,9 @@ export class TasksService {
   ) {}
 
   /**
-   * Retrieves all tasks in the system.
+   * Retorna todas las tareas del sistema.
    *
-   * @returns {Task[]} Array of all tasks with resolved user and project references
+   * @returns {Task[]} Lista completa de tareas con usuario y proyecto ya resueltos
    */
   @LogAction('TasksService')
   findAll(): Task[] {
@@ -41,26 +44,28 @@ export class TasksService {
   }
 
   /**
-   * Finds a single task by its unique identifier.
+   * Busca una tarea por su ID.
    *
-   * @param {string} id - The UUID of the task to find
-   * @returns {Task} The found task with resolved relationships
-   * @throws {NotFoundException} When no task exists with the given id
+   * @param {string} id - UUID de la tarea
+   * @returns {Task} La tarea encontrada
+   * @throws {NotFoundException} Si no existe ninguna tarea con ese ID
    */
   @LogAction('TasksService')
   findOne(id: string): Task {
     const task = this.tasks.find((t) => t.id === id);
+
     if (!task) {
-      throw new NotFoundException(`Task with id "${id}" not found`);
+      throw new NotFoundException(`Tarea con id "${id}" no encontrada`);
     }
+
     return task;
   }
 
   /**
-   * Retrieves all tasks that belong to a specific project.
+   * Filtra las tareas que pertenecen a un proyecto específico.
    *
-   * @param {string} projectId - The UUID of the project
-   * @returns {Task[]} Array of tasks belonging to the project
+   * @param {string} projectId - UUID del proyecto
+   * @returns {Task[]} Tareas del proyecto indicado
    */
   @LogAction('TasksService')
   findByProject(projectId: string): Task[] {
@@ -68,10 +73,10 @@ export class TasksService {
   }
 
   /**
-   * Retrieves all tasks assigned to a specific user.
+   * Filtra las tareas asignadas a un usuario específico.
    *
-   * @param {string} userId - The UUID of the user
-   * @returns {Task[]} Array of tasks assigned to the user
+   * @param {string} userId - UUID del usuario
+   * @returns {Task[]} Tareas asignadas al usuario indicado
    */
   @LogAction('TasksService')
   findByUser(userId: string): Task[] {
@@ -79,15 +84,18 @@ export class TasksService {
   }
 
   /**
-   * Creates a new task in the system.
-   * Resolves the user and project references from their respective services.
+   * Crea una nueva tarea en el sistema.
+   * Antes de crear, verifica que el usuario y el proyecto existan.
+   * Si alguno no existe, los servicios correspondientes lanzarán NotFoundException.
    *
-   * @param {CreateTaskInput} input - The data required to create the task
-   * @returns {Task} The newly created task with resolved relationships
-   * @throws {NotFoundException} When the specified user or project does not exist
+   * @param {CreateTaskInput} input - Datos de la nueva tarea
+   * @returns {Task} La tarea creada con el usuario y proyecto resueltos
+   * @throws {NotFoundException} Si el usuario o el proyecto no existen
    */
   @LogAction('TasksService')
   create(input: CreateTaskInput): Task {
+    // Verificamos que existan el usuario y el proyecto antes de crear la tarea.
+    // Si no existen, findOne lanza NotFoundException automáticamente.
     const assignedUser = this.usersService.findOne(input.assignedUserId);
     const project = this.projectsService.findOne(input.projectId);
 
@@ -95,11 +103,13 @@ export class TasksService {
       id: uuidv4(),
       title: input.title,
       description: input.description,
+      // Si no mandan status, la tarea empieza en BACKLOG por defecto
       status: input.status ?? TaskStatus.BACKLOG,
+      // Si no mandan tags, arrancamos con arreglo vacío
       tags: input.tags ?? [],
       createdAt: new Date().toISOString(),
-      assignedUser,
-      project,
+      assignedUser,  // guardamos el objeto completo del usuario
+      project,       // guardamos el objeto completo del proyecto
     };
 
     this.tasks.push(newTask);
@@ -107,26 +117,30 @@ export class TasksService {
   }
 
   /**
-   * Updates an existing task's fields.
-   * Supports partial updates: any combination of fields can be changed.
+   * Actualiza los campos de una tarea existente.
+   * Permite actualizaciones parciales: solo se modifican los campos enviados.
+   * También permite reasignar el usuario o mover la tarea a otro proyecto.
    *
-   * @param {UpdateTaskInput} input - The fields to update on the task
-   * @returns {Task} The updated task object
-   * @throws {NotFoundException} When the task, user, or project cannot be found
+   * @param {UpdateTaskInput} input - Campos a actualizar
+   * @returns {Task} La tarea con los cambios aplicados
+   * @throws {NotFoundException} Si la tarea, el usuario o el proyecto no existen
    */
   @LogAction('TasksService')
   update(input: UpdateTaskInput): Task {
     const task = this.findOne(input.id);
 
+    // Actualizamos solo los campos que llegaron en el input
     if (input.title !== undefined) task.title = input.title;
     if (input.description !== undefined) task.description = input.description;
     if (input.status !== undefined) task.status = input.status;
     if (input.tags !== undefined) task.tags = input.tags;
 
+    // Si cambia el usuario asignado, lo buscamos para validar que exista
     if (input.assignedUserId !== undefined) {
       task.assignedUser = this.usersService.findOne(input.assignedUserId);
     }
 
+    // Si cambia el proyecto, también lo validamos
     if (input.projectId !== undefined) {
       task.project = this.projectsService.findOne(input.projectId);
     }
@@ -135,18 +149,20 @@ export class TasksService {
   }
 
   /**
-   * Removes a task from the system by its id.
+   * Elimina una tarea por su ID.
    *
-   * @param {string} id - The UUID of the task to delete
-   * @returns {boolean} True if the task was successfully removed
-   * @throws {NotFoundException} When no task exists with the given id
+   * @param {string} id - UUID de la tarea a eliminar
+   * @returns {boolean} true si se eliminó correctamente
+   * @throws {NotFoundException} Si la tarea no existe
    */
   @LogAction('TasksService')
   remove(id: string): boolean {
     const index = this.tasks.findIndex((t) => t.id === id);
+
     if (index === -1) {
-      throw new NotFoundException(`Task with id "${id}" not found`);
+      throw new NotFoundException(`Tarea con id "${id}" no encontrada`);
     }
+
     this.tasks.splice(index, 1);
     return true;
   }
