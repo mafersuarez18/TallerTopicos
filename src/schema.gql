@@ -1,0 +1,107 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CreateProjectInput {
+  description: String!
+  name: String!
+}
+
+input CreateTaskInput {
+  assignedUserId: ID!
+  description: String!
+  projectId: ID!
+  status: TaskStatus
+  tags: [String!]
+  title: String!
+}
+
+input CreateUserInput {
+  email: String!
+  name: String!
+}
+
+type Mutation {
+  createProject(createProjectInput: CreateProjectInput!): Project!
+  createTask(createTaskInput: CreateTaskInput!): Task!
+  createUser(createUserInput: CreateUserInput!): User!
+  removeProject(id: ID!): Boolean!
+  removeTask(id: ID!): Boolean!
+  removeUser(id: ID!): Boolean!
+  updateProject(updateProjectInput: UpdateProjectInput!): Project!
+  updateTask(updateTaskInput: UpdateTaskInput!): Task!
+  updateUser(updateUserInput: UpdateUserInput!): User!
+}
+
+type Project {
+  createdAt: String!
+  description: String!
+  id: ID!
+  name: String!
+}
+
+type Query {
+  project(id: ID!): Project!
+  projects: [Project!]!
+  task(id: ID!): Task!
+  tasks: [Task!]!
+  tasksByProject(projectId: ID!): [Task!]!
+  tasksByUser(userId: ID!): [Task!]!
+  user(id: ID!): User!
+  users: [User!]!
+}
+
+type Task {
+  assignedUser: User!
+  createdAt: String!
+  description: String!
+  id: ID!
+  project: Project!
+  status: TaskStatus!
+  tags: [String!]!
+  title: String!
+}
+
+"""The possible lifecycle states of a task"""
+enum TaskStatus {
+  """Task identified but not yet scheduled"""
+  BACKLOG
+
+  """Task completed"""
+  DONE
+
+  """Task currently being worked on"""
+  IN_PROGRESS
+
+  """Task scheduled and ready to start"""
+  TODO
+}
+
+input UpdateProjectInput {
+  description: String
+  id: ID!
+  name: String
+}
+
+input UpdateTaskInput {
+  assignedUserId: ID
+  description: String
+  id: ID!
+  projectId: ID
+  status: TaskStatus
+  tags: [String!]
+  title: String
+}
+
+input UpdateUserInput {
+  email: String
+  id: ID!
+  name: String
+}
+
+type User {
+  createdAt: String!
+  email: String!
+  id: ID!
+  name: String!
+}

@@ -6,22 +6,26 @@ import { UpdateTaskInput } from './dto/update-task.input';
 
 /**
  * @class TasksResolver
- * @description GraphQL resolver for task-related queries and mutations.
- * Provides full CRUD operations and additional filtered queries.
- * Delegates all business logic to TasksService following the resolver pattern.
+ *
+ * Resolver de GraphQL para las operaciones de tareas.
+ * Expone todas las queries y mutations relacionadas con tareas.
+ * Incluye operaciones de CRUD básico más consultas filtradas
+ * (por proyecto y por usuario) que son útiles para dashboards.
+ *
+ * Como siempre, la lógica real está en el TasksService.
  */
 @Resolver(() => Task)
 export class TasksResolver {
   /**
    * @constructor
-   * @param {TasksService} tasksService - Injected service for task operations
+   * @param {TasksService} tasksService - Servicio inyectado con la lógica de tareas
    */
   constructor(private readonly tasksService: TasksService) {}
 
   /**
-   * Query to retrieve all tasks in the system.
+   * Query que retorna todas las tareas del sistema.
    *
-   * @returns {Task[]} List of all tasks with their resolved relationships
+   * @returns {Task[]} Lista de tareas con usuario y proyecto resueltos
    */
   @Query(() => [Task], { name: 'tasks' })
   findAll(): Task[] {
@@ -29,10 +33,10 @@ export class TasksResolver {
   }
 
   /**
-   * Query to find a specific task by its unique identifier.
+   * Query para obtener una tarea específica por ID.
    *
-   * @param {string} id - The UUID of the task to retrieve
-   * @returns {Task} The found task with resolved relationships
+   * @param {string} id - UUID de la tarea
+   * @returns {Task} La tarea encontrada
    */
   @Query(() => Task, { name: 'task' })
   findOne(@Args('id', { type: () => ID }) id: string): Task {
@@ -40,10 +44,11 @@ export class TasksResolver {
   }
 
   /**
-   * Query to retrieve all tasks belonging to a specific project.
+   * Query para obtener todas las tareas de un proyecto específico.
+   * Útil para mostrar el tablero de tareas de un proyecto.
    *
-   * @param {string} projectId - The UUID of the project to filter by
-   * @returns {Task[]} List of tasks in the given project
+   * @param {string} projectId - UUID del proyecto
+   * @returns {Task[]} Tareas que pertenecen a ese proyecto
    */
   @Query(() => [Task], { name: 'tasksByProject' })
   findByProject(
@@ -53,10 +58,11 @@ export class TasksResolver {
   }
 
   /**
-   * Query to retrieve all tasks assigned to a specific user.
+   * Query para obtener todas las tareas asignadas a un usuario.
+   * Útil para que cada desarrollador vea su lista de trabajo pendiente.
    *
-   * @param {string} userId - The UUID of the user to filter by
-   * @returns {Task[]} List of tasks assigned to the given user
+   * @param {string} userId - UUID del usuario
+   * @returns {Task[]} Tareas asignadas a ese usuario
    */
   @Query(() => [Task], { name: 'tasksByUser' })
   findByUser(@Args('userId', { type: () => ID }) userId: string): Task[] {
@@ -64,10 +70,10 @@ export class TasksResolver {
   }
 
   /**
-   * Mutation to create a new task in the system.
+   * Mutation para crear una tarea nueva.
    *
-   * @param {CreateTaskInput} createTaskInput - The input data for the new task
-   * @returns {Task} The newly created task with resolved relationships
+   * @param {CreateTaskInput} createTaskInput - Datos de la nueva tarea
+   * @returns {Task} La tarea creada
    */
   @Mutation(() => Task)
   createTask(
@@ -77,12 +83,11 @@ export class TasksResolver {
   }
 
   /**
-   * Mutation to update an existing task.
-   * Supports partial updates: status, tags, assigned user and other fields
-   * can all be changed independently.
+   * Mutation para actualizar una tarea existente.
+   * Permite cambiar el estado, etiquetas, usuario asignado o cualquier otro campo.
    *
-   * @param {UpdateTaskInput} updateTaskInput - The input data with updated fields
-   * @returns {Task} The updated task
+   * @param {UpdateTaskInput} updateTaskInput - Campos a modificar
+   * @returns {Task} La tarea con los cambios aplicados
    */
   @Mutation(() => Task)
   updateTask(
@@ -92,10 +97,10 @@ export class TasksResolver {
   }
 
   /**
-   * Mutation to delete a task from the system.
+   * Mutation para eliminar una tarea.
    *
-   * @param {string} id - The UUID of the task to remove
-   * @returns {boolean} True if deletion was successful
+   * @param {string} id - UUID de la tarea a eliminar
+   * @returns {boolean} true si se eliminó, error si no existía
    */
   @Mutation(() => Boolean)
   removeTask(@Args('id', { type: () => ID }) id: string): boolean {

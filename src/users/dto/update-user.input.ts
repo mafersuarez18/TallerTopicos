@@ -2,25 +2,27 @@ import { InputType, Field, ID } from '@nestjs/graphql';
 
 /**
  * @class UpdateUserInput
- * @description GraphQL InputType for updating an existing user.
- * All fields except id are optional to allow partial updates.
+ *
+ * Datos necesarios para actualizar un usuario existente.
+ * Solo el id es obligatorio; los demás campos son opcionales
+ * para permitir actualizaciones parciales (no hay que mandar todo).
  */
 @InputType()
 export class UpdateUserInput {
   /**
-   * Unique identifier of the user to be updated.
+   * ID del usuario que se quiere modificar.
    */
   @Field(() => ID)
   id: string;
 
   /**
-   * New full name for the user (optional).
+   * Nuevo nombre del usuario (opcional).
    */
   @Field({ nullable: true })
   name?: string;
 
   /**
-   * New email address for the user (optional).
+   * Nuevo correo del usuario (opcional).
    */
   @Field({ nullable: true })
   email?: string;
